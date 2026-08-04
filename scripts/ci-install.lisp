@@ -102,9 +102,9 @@
   (call-with-ci-muffles
    (lambda ()
      (ci-install "cl-plus-ssl" :version "latest")
-     (ci-fetch "http-protocol" :version "0.2.2")
+     (ci-fetch "http-protocol" :version "0.2.3")
      (ci-fetch "cl-stack-pathlib" :version "0.1.1")
-     (ci-fetch "cl-stack-http" :version "0.1.5")
+     (ci-fetch "cl-stack-http" :version "0.1.6")
      (ci-fetch "http-backend-async" :version "0.1.3")
      (ci-fetch "http-encoding-chipz")
      (ci-fetch "http-encoding-brotli")
