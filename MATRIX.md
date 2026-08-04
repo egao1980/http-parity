@@ -10,7 +10,7 @@ Printed at runtime by `(http-parity:print-matrix)`.
 | json | `json=` / `r.json()` | **have** | `:json` + `response-json` |
 | form | `data=` urlencoded | **have** | `:form-data` (protocol 0.2) |
 | files | `files=` multipart | **have** | `coerce-files` / `path-http-file` |
-| download | path write | **have** | `download`; dir + CD filename (`:filename :content-disposition`) |
+| download | path write | **have** | `download`; dir + CD filename; MIME ext from Content-Type when missing |
 | upload | path read | **have** | `upload` |
 | text / content / ok | `r.text` / `.content` / `.ok` | **have** | response DX |
 | stream | `iter_bytes` / `iter_lines` | **have** | `:want-stream` |

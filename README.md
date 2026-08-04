@@ -89,7 +89,7 @@ Print matrix only:
 | Redirect | follow, history, max-redirects |
 | CE | gzip, deflate, optional br; finance demo = live br+gzip |
 | Stream | `:want-stream` sync + async |
-| Files | multipart tuples, download/upload + CD filename |
+| Files | multipart tuples, download/upload + CD filename + MIME ext |
 | Status | `raise-for-status`, short timeout |
 
 ## Layering
