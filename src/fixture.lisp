@@ -116,14 +116,23 @@
     (cond
       ((member path* '("/get" "/headers") :test #'string=)
        (let* ((args (if query
-                        (format nil "{~{~A~^,~}}"
-                                (loop for part in (uiop:split-string query :separator "&")
-                                      for eq = (position #\= part)
-                                      when eq
+                        ;; httpbin: repeated keys → JSON array (valid for yason)
+                        (let ((bag (make-hash-table :test #'equal)))
+                          (loop for part in (uiop:split-string query :separator "&")
+                                for eq = (position #\= part)
+                                when eq
+                                  do (let ((k (quri:url-decode (subseq part 0 eq)))
+                                           (v (quri:url-decode (subseq part (1+ eq)))))
+                                       (setf (gethash k bag)
+                                             (nconc (gethash k bag) (list v)))))
+                          (format nil "{~{~A~^,~}}"
+                                  (loop for k being the hash-keys of bag using (hash-value vs)
                                         collect (format nil "~A:~A"
-                                                        (%json-escape (subseq part 0 eq))
-                                                        (%json-escape
-                                                         (quri:url-decode (subseq part (1+ eq)))))))
+                                                        (%json-escape k)
+                                                        (if (cdr vs)
+                                                            (format nil "[~{~A~^,~}]"
+                                                                    (mapcar #'%json-escape vs))
+                                                            (%json-escape (first vs)))))))
                         "{}"))
               (payload (format nil "{\"url\":~A,\"args\":~A,\"headers\":{}}"
                                (%json-escape

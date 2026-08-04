@@ -31,6 +31,7 @@
   :serial t
   :components ((:file "package")
                (:file "verbs")
+               (:file "params")
                (:file "json")
                (:file "session")
                (:file "auth")

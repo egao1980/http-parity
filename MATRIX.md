@@ -5,6 +5,7 @@ Printed at runtime by `(http-parity:print-matrix)`.
 | Area | Python | Status | Notes |
 |------|--------|--------|-------|
 | verbs | get/post/put/patch/delete/head/options | **have** | stack-http facade |
+| params | query `params=` + multi-value lists | **have** | http-protocol 0.2.2+ (`NIL` dropped) |
 | async | AsyncClient / `*-async` | **have** | blackbird; sync `SEND` awaits |
 | session | Session cookies + base_url | **have** | `with-session` |
 | json | `json=` / `r.json()` | **have** | `:json` + `response-json` |
