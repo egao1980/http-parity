@@ -15,4 +15,6 @@
    #:with-parity
    #:await
    #:print-matrix
-   #:run))
+   #:run
+   #:run-demo
+   #:reset-demo-api))

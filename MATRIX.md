@@ -17,7 +17,7 @@ Printed at runtime by `(http-parity:print-matrix)`.
 | gzip / deflate | Content-Encoding | **have** | chipz |
 | br / zstd | Content-Encoding | **partial** | soft-load encoding backends |
 | basic / bearer | auth | **have** | protocol `:auth` |
-| digest | HTTPDigestAuth | **partial** | stack-http retry needs `http-request-extras` export |
+| digest | HTTPDigestAuth | **have** | stack-http sync retry (`http-protocol` 0.2.1+) |
 | netrc / trust_env | `trust_env` | **have** | env proxy + `~/.netrc` |
 | redirect | `allow_redirects` / history | **have** | protocol |
 | timeout | `timeout=` | **have** | `http-timeout` |

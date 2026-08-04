@@ -8,7 +8,17 @@ Default origin is a **local httpbin-shaped fixture** (cleartext). Optional publi
 
 See [MATRIX.md](MATRIX.md). Status keys: `have` · `partial` · `missing` · `sep` (other package).
 
-## Run locally
+## Realistic demo
+
+Login → JSON catalog list/create → download blobs (async + session `base-url`):
+
+```bash
+export HTTP_PARITY_BACKEND=async
+export HTTP_PARITY_FIXTURE=1
+ros -l scripts/demo.lisp
+```
+
+## Run tests
 
 ```bash
 export HTTP_PARITY_BACKEND=async          # default

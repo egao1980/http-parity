@@ -108,6 +108,10 @@
 
 (defun %parity-handler (method path headers body)
   "httpbingo/httpbin-shaped routes used by http-parity tests."
+  (multiple-value-bind (api-status api-hdrs api-body)
+      (%demo-api-handler method path headers body)
+    (when api-status
+      (return-from %parity-handler (values api-status api-hdrs api-body))))
   (multiple-value-bind (path* query) (%query path)
     (cond
       ((member path* '("/get" "/headers") :test #'string=)
@@ -314,6 +318,7 @@
 (defun start-fixture (&key (host "127.0.0.1"))
   (when *fixture-thread*
     (stop-fixture))
+  (reset-demo-api)
   (let* ((server (usocket:socket-listen host 0
                                         :reuseaddress t
                                         :element-type '(unsigned-byte 8)))

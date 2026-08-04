@@ -20,7 +20,9 @@
           (ok (= 200 (response-status res)))))))
 
 (deftest parity-digest-auth
-  "requests HTTPDigestAuth (sync challenge retry).
-   Skipped: cl-stack-http RETRY-WITH-DIGEST calls HTTP-REQUEST-EXTRAS which is
-   not external in http-protocol (undefined in stack-http package)."
-  (skip "digest retry needs http-protocol:http-request-extras export"))
+  "requests HTTPDigestAuth (sync challenge retry)."
+  (with-live
+    (let ((res (http:get (live-url "/digest-auth/auth/user/pass")
+                         :auth (http:digest-auth "user" "pass")
+                         :timeout 25.0 :trust-env nil)))
+      (ok (= 200 (response-status res))))))

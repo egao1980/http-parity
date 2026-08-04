@@ -22,7 +22,7 @@
     ("zstd" "Content-Encoding zstd" :partial "soft-load http-encoding-zstd")
     ("basic" "HTTPBasicAuth" :have ":auth (:basic u p)")
     ("bearer" "Authorization Bearer" :have ":auth (:bearer tok)")
-    ("digest" "HTTPDigestAuth" :partial "retry needs http-request-extras export")
+    ("digest" "HTTPDigestAuth" :have "stack-http digest-auth retry (sync)")
     ("netrc" "trust_env + ~/.netrc" :have "trust-env t")
     ("redirect" "allow_redirects / history" :have "protocol redirects")
     ("timeout" "timeout=" :have "http-timeout")

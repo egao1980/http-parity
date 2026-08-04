@@ -17,10 +17,13 @@
   :serial t
   :pathname "src"
   :components ((:file "package")
+               (:file "demo-api")
                (:file "fixture")
                (:file "harness")
+               (:file "demo")
                (:file "report"))
   :in-order-to ((test-op (test-op "http-parity/tests"))))
+
 (defsystem "http-parity/tests"
   :depends-on ("http-parity" "rove")
   :pathname "tests"
@@ -34,7 +37,8 @@
                (:file "encoding")
                (:file "stream")
                (:file "files")
-               (:file "status"))
+               (:file "status")
+               (:file "demo"))
   :perform (test-op (o c)
              (unless (symbol-call :rove :run c)
                (error "http-parity tests failed"))))
