@@ -2,7 +2,8 @@
   (:use #:cl #:rove #:http-protocol #:http-parity)
   (:shadowing-import-from #:rove #:run)
   (:local-nicknames (#:http #:cl-stack-http)
-                    (#:stack #:cl-stack-http)))
+                    (#:stack #:cl-stack-http)
+                    (#:path #:cl-stack-pathlib)))
 
 (in-package #:http-parity/tests)
 

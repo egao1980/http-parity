@@ -18,6 +18,26 @@ export HTTP_PARITY_FIXTURE=1
 ros -l scripts/demo.lisp
 ```
 
+## Finance demo (live CE + CD filenames)
+
+Public HTTPS: Frankfurter FX (query + date range) + Fin-node equity JSON downloads.
+Exercises real-world `Content-Encoding` (`br` default, forced `gzip`) and
+`Content-Disposition` filenames via `http:download` → directory.
+
+```bash
+export HTTP_PARITY_BACKEND=async
+export HTTP_PARITY_FIXTURE=0
+# soft-loads http-encoding-brotli / http-encoding-chipz when available
+ros -l scripts/finance-demo.lisp
+```
+
+Live Rove case (skipped unless set):
+
+```bash
+export HTTP_PARITY_FINANCE=1
+ros -e '(asdf:test-system "http-parity")' -q
+```
+
 ## Run tests
 
 ```bash
@@ -55,6 +75,7 @@ Print matrix only:
 | `HTTP_PARITY_BASE` | `https://httpbingo.org` | Public origin when fixture off |
 | `HTTP_PARITY_LIVE` | on | `0`/`false`/`off` skips cases |
 | `HTTP_PARITY_BR_URL` | `{BASE}/brotli` | Optional br probe |
+| `HTTP_PARITY_FINANCE` | off | `1` → live Frankfurter/Fin-node CE+CD test |
 | `HTTP_ASYNC_EVENT_BACKEND` | `libuv` | Event backend for async |
 
 ## Coverage
@@ -66,9 +87,9 @@ Print matrix only:
 | Session | cookies + default params |
 | Auth | basic, bearer, digest |
 | Redirect | follow, history, max-redirects |
-| CE | gzip, deflate, optional br |
+| CE | gzip, deflate, optional br; finance demo = live br+gzip |
 | Stream | `:want-stream` sync + async |
-| Files | multipart tuples, download/upload round-trip |
+| Files | multipart tuples, download/upload + CD filename |
 | Status | `raise-for-status`, short timeout |
 
 ## Layering

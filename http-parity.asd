@@ -21,6 +21,7 @@
                (:file "fixture")
                (:file "harness")
                (:file "demo")
+               (:file "finance-demo")
                (:file "report"))
   :in-order-to ((test-op (test-op "http-parity/tests"))))
 
@@ -38,7 +39,8 @@
                (:file "stream")
                (:file "files")
                (:file "status")
-               (:file "demo"))
+               (:file "demo")
+               (:file "finance-demo"))
   :perform (test-op (o c)
              (unless (symbol-call :rove :run c)
                (error "http-parity tests failed"))))

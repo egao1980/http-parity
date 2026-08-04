@@ -10,12 +10,12 @@ Printed at runtime by `(http-parity:print-matrix)`.
 | json | `json=` / `r.json()` | **have** | `:json` + `response-json` |
 | form | `data=` urlencoded | **have** | `:form-data` (protocol 0.2) |
 | files | `files=` multipart | **have** | `coerce-files` / `path-http-file` |
-| download | path write | **have** | `download` |
+| download | path write | **have** | `download`; dir + CD filename (`:filename :content-disposition`) |
 | upload | path read | **have** | `upload` |
 | text / content / ok | `r.text` / `.content` / `.ok` | **have** | response DX |
 | stream | `iter_bytes` / `iter_lines` | **have** | `:want-stream` |
-| gzip / deflate | Content-Encoding | **have** | chipz |
-| br / zstd | Content-Encoding | **partial** | soft-load encoding backends |
+| gzip / deflate | Content-Encoding | **have** | chipz; finance demo forces gzip AE |
+| br / zstd | Content-Encoding | **partial** | soft-load; finance demo hits live `br` (Frankfurter/Fin-node) |
 | basic / bearer | auth | **have** | protocol `:auth` |
 | digest | HTTPDigestAuth | **have** | stack-http sync retry (`http-protocol` 0.2.1+) |
 | netrc / trust_env | `trust_env` | **have** | env proxy + `~/.netrc` |
