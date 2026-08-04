@@ -1,0 +1,9 @@
+*.fasl
+*.dx64fsl
+*.lx64fasl
+*.wx64fsl
+.qlot/
+.cl-repository/
+/tmp/
+*.log
+.DS_Store
