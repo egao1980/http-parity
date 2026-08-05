@@ -1,4 +1,6 @@
-;;;; Phase 1: OCI fetch only (no cffi/cl+ssl load mid-flight).
+;;;; Phase 1: install SUT dependency closure via cl-repository-client.
+;;;; Event backend + cl-stack-ssl + CE overlays are CI :with extras.
+;;;; No ASDF-load of overlays here — see ci-test.
 
 (setf *debugger-hook*
       (lambda (c h)
@@ -21,115 +23,40 @@
 
 (call-with-ci-muffles (lambda () (asdf:load-system "cl-repository-client")))
 
-(defparameter *ci-ql-sources*
-  '(("babel" :ql)
-    ("trivial-features" :ql)
-    ("cl-unicode" :ql)))
+(defun ci-record-installed-version (system env-var)
+  (let ((ver (cl-repo:installed-system-version system))
+        (env (uiop:getenv "GITHUB_ENV")))
+    (when (and ver env)
+      (with-open-file (out env :direction :output :if-exists :append :if-does-not-exist :create)
+        (format out "~a=~a~%" env-var ver))
+      (format t "~&; ci: ~a=~a~%" env-var ver))))
 
 (cl-repo:add-registry "https://ghcr.io" :namespace "egao1980/cl-systems" :priority :prepend)
 
-(defun ci-on-disk-p (name)
-  (cl-repository-client/quickload::system-already-installed-p name))
-
-(defun ci-newest-tag (oci-name)
-  (let* ((token (or (uiop:getenv "GITHUB_TOKEN") (uiop:getenv "GH_TOKEN")))
-         (auth (when token
-                 (cl-oci-client/auth:make-auth-config
-                  :username (or (uiop:getenv "GITHUB_ACTOR") "x-access-token")
-                  :password token)))
-         (reg (cl-oci-client/registry:make-registry "https://ghcr.io" :auth auth))
-         (repo (format nil "egao1980/cl-systems/~a" oci-name))
-         (tags (cl-oci-client/content-discovery:list-tags reg repo))
-         (version-tags (remove "latest" tags :test #'string=)))
-    (or (cl-repository-client/version-utils:select-preferred-version version-tags)
-        (first tags)
-        (error "ci-newest-tag: no tags for ~a" oci-name))))
-
-(defun ci-install (oci-name &key version)
-  (let ((version (or version (ci-newest-tag oci-name))))
-    (format t "~&; ci: install ~a:~a~%" oci-name version)
-    (cl-repo:install-system oci-name :version version)
-    (cl-repository-client/asdf-integration:configure-asdf-source-registry)
-    version))
-
-(defun ci-fetch (name &key version)
-  (format t "~&; ci: fetch ~a~@[:~a~]~%" name version)
-  (cl-repository-client/source-policy:call-with-policy-overrides
-   *ci-ql-sources* nil nil nil
-   (lambda ()
-     (cl-repository-client/protected-systems:ensure-snapshot)
-     (cl-repository-client/digest-cache:load-digest-cache)
-     (let ((plan (cl-repository-client/quickload::compute-install-plan
-                  (list name) :version version)))
-       (dolist (entry plan)
-         (let ((n (car entry))
-               (ver (cdr entry)))
-           (unless (or (cl-repository-client/source-policy:system-denied-p n)
-                       (and (ci-on-disk-p n)
-                            (let ((iv (cl-repository-client/quickload::installed-system-version n)))
-                              (and iv (string= iv (princ-to-string ver))))))
-             (format t "~&; ci: ensure-installed ~a~@[:~a~]~%" n ver)
-             (cl-repository-client/quickload::ensure-system-installed n :version ver)
-             (cl-repository-client/asdf-integration:configure-asdf-source-registry)))))))
-  (cl-repository-client/asdf-integration:configure-asdf-source-registry)
-  (unless (or (ci-on-disk-p name) (asdf:find-system name nil))
-    (error "ci-fetch: ~a not on disk after install" name)))
-
-(defun ci-patch-stack-ssl (version)
-  "SBCL: defconstant → defparameter for +openssl-version+ when needed."
-  (declare (ignore version))
-  (let* ((sys (asdf:find-system "cl-stack-ssl" nil))
-         (dir (and sys (asdf:system-source-directory sys)))
-         (setup (and dir (merge-pathnames "cl-repo-init.lisp" dir))))
-    (when (and setup (probe-file setup))
-      (let ((text (uiop:read-file-string setup))
-            (fixed (search "(defconstant +openssl-version+" text)))
-        (when fixed
-          (setf text (concatenate 'string
-                                  (subseq text 0 fixed)
-                                  "(defparameter +openssl-version+"
-                                  (subseq text (+ fixed (length "(defconstant +openssl-version+")))))
-          (with-open-file (out setup :direction :output :if-exists :supersede)
-            (write-string text out))
-          (format t "~&; ci: patched ~a~%" setup))))))
-
 (let* ((backend (string-downcase (or (uiop:getenv "HTTP_ASYNC_EVENT_BACKEND") "libuv")))
-       (cl-stack-ssl-version (uiop:getenv "CL_STACK_SSL_VERSION"))
        (event-sys (cond ((string= backend "libuv") "event-backend-libuv")
                         ((string= backend "libev") "event-backend-libev")
-                        (t (error "Unknown HTTP_ASYNC_EVENT_BACKEND: ~a" backend)))))
-  (format t "~&; ci: event backend ~a~%" backend)
+                        (t (error "Unknown HTTP_ASYNC_EVENT_BACKEND: ~a" backend))))
+       (with (list event-sys
+                   "cl-stack-ssl"
+                   "http-encoding-chipz"
+                   "http-encoding-brotli"
+                   "http-encoding-zstd"
+                   "cl-stack-brotli"
+                   "cl-stack-zstd")))
+  (format t "~&; ci: event backend ~a -> ~a~%" backend event-sys)
   (call-with-ci-muffles
    (lambda ()
-     (ci-install "cl-plus-ssl" :version "latest")
-     (ci-fetch "http-protocol" :version "0.2.3")
-     (ci-fetch "cl-stack-pathlib" :version "0.1.1")
-     (ci-fetch "cl-stack-http" :version "0.1.6")
-     (ci-fetch "http-backend-async" :version "0.1.3")
-     (ci-fetch "http-encoding-chipz")
-     (ci-fetch "http-encoding-brotli")
-     (ci-fetch "cl-stack-brotli")
-     (ci-fetch "quri")
-     (ci-fetch "chipz")
-     (ci-fetch "salza2")
-     (ci-fetch "alexandria")
-     (ci-fetch "cffi")
-     (ci-fetch "usocket")
-     (ci-fetch "event-protocol" :version "0.1.1")
-     (ci-fetch event-sys)
-     (let ((ssl-ver (ci-install "cl-stack-ssl" :version cl-stack-ssl-version)))
-       (ci-patch-stack-ssl ssl-ver)
-       (when (uiop:getenv "GITHUB_ENV")
-         (with-open-file (out (uiop:getenv "GITHUB_ENV")
-                              :direction :output
-                              :if-exists :append :if-does-not-exist :create)
-           (format out "CL_STACK_SSL_VERSION=~a~%" ssl-ver))))
-     (dolist (n '("rove" "fast-http" "babel" "usocket" "bordeaux-threads"
-                  "blackbird" "trivial-gray-streams" "cl-cookie" "cl-unicode"
-                  "cl-base64" "yason" "trivial-mimes" "ironclad"))
-       (unless (or (ci-on-disk-p n) (asdf:find-system n nil))
-         (format t "~&; ci: ql fallback ~a~%" n)
-         (ql:quickload n :silent t))))))
+     (cl-repo:ensure-system-dependencies "http-parity"
+       :also-tests t
+       :with with
+       :sources '(("babel" :ql)
+                  ("trivial-features" :ql)
+                  ("cl-unicode" :ql)))
+     (ci-record-installed-version "cl-stack-ssl" "CL_STACK_SSL_VERSION")
+     (ci-record-installed-version "http-protocol" "HTTP_PROTOCOL_VERSION")
+     (ci-record-installed-version "cl-stack-http" "CL_STACK_HTTP_VERSION")
+     (ci-record-installed-version "http-backend-async" "HTTP_BACKEND_ASYNC_VERSION"))))
 
 (format t "~&; ci: install phase done~%")
 (uiop:quit 0)

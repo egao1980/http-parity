@@ -18,7 +18,7 @@ Printed at runtime by `(http-parity:print-matrix)`.
 | elapsed / bytes | `r.elapsed` / `num_bytes_downloaded` | **have** | `response-elapsed` / `response-bytes-downloaded` (0.2.3 / 0.1.6) |
 | hooks | `hooks=` / `event_hooks=` | **have** | CLOS `prepare-request` / `handle-response` |
 | gzip / deflate | Content-Encoding | **have** | chipz; finance demo forces gzip AE |
-| br / zstd | Content-Encoding | **partial** | soft-load; finance demo hits live `br` (Frankfurter/Fin-node) |
+| br / zstd | Content-Encoding | **have** | encoding backends + overlays; finance demo hits live `br` |
 | basic / bearer | auth | **have** | protocol `:auth` |
 | digest | HTTPDigestAuth | **have** | stack-http sync retry (`http-protocol` 0.2.1+) |
 | netrc / trust_env | `trust_env` | **have** | env proxy + `~/.netrc` |

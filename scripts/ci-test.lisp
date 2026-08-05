@@ -30,13 +30,12 @@
                         (t (error "Unknown HTTP_ASYNC_EVENT_BACKEND: ~a" backend)))))
   (format t "~&; ci: test backend=~a event=~a parity-backend=~a~%"
           backend event-sys (or (uiop:getenv "HTTP_PARITY_BACKEND") "async"))
+  (format t "~&; ci: pins http-protocol=~a cl-stack-http=~a async=~a~%"
+          (or (uiop:getenv "HTTP_PROTOCOL_VERSION") "?")
+          (or (uiop:getenv "CL_STACK_HTTP_VERSION") "?")
+          (or (uiop:getenv "HTTP_BACKEND_ASYNC_VERSION") "?"))
   (call-with-ci-muffles
    (lambda ()
-     (dolist (n '("rove" "fast-http" "babel" "usocket" "bordeaux-threads"
-                  "blackbird" "trivial-gray-streams" "cl-cookie" "yason"
-                  "trivial-mimes" "cl-base64"))
-       (unless (asdf:find-system n nil)
-         (ql:quickload n :silent t)))
      (asdf:load-system "cl+ssl")
      (asdf:load-system "cl-stack-ssl")
      (asdf:load-system event-sys)
