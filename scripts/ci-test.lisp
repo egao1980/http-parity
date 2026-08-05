@@ -42,7 +42,8 @@
      (asdf:load-system "http-backend-async")
      (asdf:load-system "cl-stack-http")
      (asdf:load-system "http-parity")
-     (http-parity:print-matrix)
+     ;; uiop:symbol-call — package does not exist at read time of this file
+     (uiop:symbol-call :http-parity :print-matrix)
      (asdf:test-system "http-parity"))))
 
 (uiop:quit 0)
