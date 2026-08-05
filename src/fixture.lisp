@@ -79,18 +79,24 @@
     (funcall bytes->hex digest)))
 
 (defun %b64-decode (s)
-  (unless (find-package :cl-base64)
-    (asdf:load-system "cl-base64"))
-  (funcall (find-symbol "BASE64-STRING-TO-STRING" :cl-base64) s))
+  (asdf:load-system "cl-base64")
+  (let ((fn (or (find-symbol "BASE64-STRING-TO-STRING" :cl-base64)
+                (error "cl-base64:BASE64-STRING-TO-STRING missing"))))
+    (funcall fn s)))
 
 (defun %basic-ok-p (headers user pass)
+  "Accept Authorization: Basic <b64(user:pass)> (case-insensitive scheme)."
   (let ((auth (%header headers "authorization")))
-    (when (and auth (>= (length auth) 6)
-               (string-equal "basic " auth :end2 6))
+    (when (and auth
+               (>= (length auth) 6)
+               (eql 0 (search "basic " (string-downcase auth) :test #'char=)))
       (handler-case
           (equal (format nil "~A:~A" user pass)
-                 (%b64-decode (string-trim '(#\Space) (subseq auth 6))))
-        (error () nil)))))
+                 (%b64-decode (string-trim '(#\Space #\Tab)
+                                           (subseq auth 6))))
+        (error (e)
+          (warn "parity fixture basic-auth decode failed: ~A" e)
+          nil)))))
 
 (defun %digest-ok-p (headers method path user pass realm nonce)
   (let ((auth (%header headers "authorization")))
@@ -327,6 +333,8 @@
 (defun start-fixture (&key (host "127.0.0.1"))
   (when *fixture-thread*
     (stop-fixture))
+  ;; Basic-auth path needs cl-base64 in the accept thread — load now.
+  (asdf:load-system "cl-base64")
   (reset-demo-api)
   (let* ((server (usocket:socket-listen host 0
                                         :reuseaddress t

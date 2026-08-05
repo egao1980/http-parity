@@ -11,6 +11,7 @@
                "babel"
                "blackbird"
                "bordeaux-threads"
+               "cl-base64"
                "usocket"
                "quri"
                "rove")

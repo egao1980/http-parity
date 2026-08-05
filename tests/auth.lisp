@@ -6,7 +6,11 @@
     (let ((res (http:get (live-url "/basic-auth/user/pass")
                          :auth '(:basic "user" "pass")
                          :timeout 20.0 :trust-env nil)))
-      (ok (= 200 (response-status res)))
+      (ok (= 200 (response-status res))
+          (format nil "basic-auth status=~a body=~s www-authenticate=~s"
+                  (response-status res)
+                  (http:response-text res)
+                  (response-header res "www-authenticate")))
       (ok (search "authenticated" (http:response-text res) :test #'char-equal)))))
 
 (deftest parity-bearer-auth
