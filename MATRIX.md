@@ -1,0 +1,32 @@
+# Feature matrix — requests / httpx → cl-stack-http
+
+Printed at runtime by `(http-parity:print-matrix)`.
+
+| Area | Python | Status | Notes |
+|------|--------|--------|-------|
+| verbs | get/post/put/patch/delete/head/options | **have** | stack-http facade |
+| params | query `params=` + multi-value lists | **have** | http-protocol 0.2.2+ (`NIL` dropped) |
+| async | AsyncClient / `*-async` | **have** | blackbird; sync `SEND` awaits |
+| session | Session cookies + base_url | **have** | `with-session` |
+| json | `json=` / `r.json()` | **have** | `:json` + `response-json` |
+| form | `data=` urlencoded | **have** | `:form-data` (protocol 0.2) |
+| files | `files=` multipart | **have** | `coerce-files` / `path-http-file` |
+| download | path write | **have** | `download`; dir + CD filename; MIME ext from Content-Type when missing |
+| upload | path read | **have** | `upload` |
+| text / content / ok | `r.text` / `.content` / `.ok` | **have** | response DX |
+| stream | `iter_bytes` / `iter_lines` | **have** | `:want-stream` |
+| elapsed / bytes | `r.elapsed` / `num_bytes_downloaded` | **have** | `response-elapsed` / `response-bytes-downloaded` (0.2.3 / 0.1.6) |
+| hooks | `hooks=` / `event_hooks=` | **have** | CLOS `prepare-request` / `handle-response` |
+| gzip / deflate | Content-Encoding | **have** | chipz; finance demo forces gzip AE |
+| br / zstd | Content-Encoding | **have** | encoding backends + overlays; finance demo hits live `br` |
+| basic / bearer | auth | **have** | protocol `:auth` |
+| digest | HTTPDigestAuth | **have** | stack-http sync retry (`http-protocol` 0.2.1+) |
+| netrc / trust_env | `trust_env` | **have** | env proxy + `~/.netrc` |
+| redirect | `allow_redirects` / history | **have** | protocol |
+| timeout | `timeout=` | **have** | `http-timeout` |
+| proxy | `proxies=` | **have** | `http-proxy-config` |
+| socks | socks5 | **partial** | async SOCKS5 |
+| http2 | `http2=True` | **missing** | wave-1 = HTTP/1.1 |
+| oauth2 | auth plugins | **sep** | [`cl-stack-oauth2`](https://github.com/egao1980/cl-stack-oauth2) |
+| jwt | JWT helpers | **sep** | [`cl-stack-jwt`](https://github.com/egao1980/cl-stack-jwt) |
+| websocket | WS | **sep** | [`ws-protocol`](https://github.com/egao1980/ws-protocol) |
