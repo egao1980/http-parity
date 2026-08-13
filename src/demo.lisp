@@ -4,7 +4,7 @@
 ;;; Uses local fixture /api/* (async backend by default).
 
 (defun %ht-get (table key)
-  "Yason hash-table getter (string keys)."
+  "JSON object getter (json-protocol: string-keyed hash-table)."
   (or (gethash key table)
       (gethash (string-downcase key) table)
       (gethash (string-upcase key) table)))
@@ -85,9 +85,10 @@
                 (format t "~&; demo: item ~A~%" (%json-field one "title")))
 
               (let ((downloads nil)
+                    ;; json-protocol parses JSON arrays as vectors — use MAP, not MAPCAR.
                     (ids (remove nil
                                  (append
-                                  (mapcar (lambda (it) (%json-field it "id")) items)
+                                  (map 'list (lambda (it) (%json-field it "id")) items)
                                   (list new-id)))))
                 (dolist (id ids)
                   (let* ((title (format nil "item-~A.bin" id))
