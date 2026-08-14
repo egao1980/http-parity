@@ -26,7 +26,7 @@ Printed at runtime by `(http-parity:print-matrix)`.
 | timeout | `timeout=` | **have** | `http-timeout` |
 | proxy | `proxies=` | **have** | `http-proxy-config` |
 | socks | socks5 | **partial** | async SOCKS5 |
-| http2 | `http2=True` | **missing** | wave-1 = HTTP/1.1 |
+| http2 | `http2=True` | **have** | http-protocol **0.3.0** preference/ALPN; async/winhttp wire |
 | oauth2 | auth plugins | **sep** | [`cl-stack-oauth2`](https://github.com/egao1980/cl-stack-oauth2) |
 | jwt | JWT helpers | **sep** | [`cl-stack-jwt`](https://github.com/egao1980/cl-stack-jwt) |
 | websocket | WS | **sep** | [`ws-protocol`](https://github.com/egao1980/ws-protocol) |
