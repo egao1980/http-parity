@@ -14,6 +14,16 @@
                "usocket"
                "quri"
                "rove")
+  :properties
+  (:cl-repo
+   (:ci (:with ("cl-stack-ssl" "http-encoding-chipz" "http-encoding-brotli"
+                "http-encoding-zstd" "cl-stack-brotli" "cl-stack-zstd")
+         :sources (("babel" :ql) ("trivial-features" :ql) ("cl-unicode" :ql))
+         :load-before-test ("cl+ssl" "cl-stack-ssl" "http-backend-async" "cl-stack-http")
+         :record-versions (("cl-stack-ssl" . "CL_STACK_SSL_VERSION")
+                           ("http-protocol" . "HTTP_PROTOCOL_VERSION")
+                           ("cl-stack-http" . "CL_STACK_HTTP_VERSION")
+                           ("http-backend-async" . "HTTP_BACKEND_ASYNC_VERSION")))))
   :serial t
   :pathname "src"
   :components ((:file "package")
