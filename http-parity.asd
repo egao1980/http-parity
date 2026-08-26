@@ -18,7 +18,6 @@
   (:cl-repo
    (:ci (:with ("cl-stack-ssl" "http-encoding-chipz" "http-encoding-brotli"
                 "http-encoding-zstd" "cl-stack-brotli" "cl-stack-zstd")
-         :sources (("babel" :ql) ("trivial-features" :ql) ("cl-unicode" :ql))
          :load-before-test ("cl+ssl" "cl-stack-ssl" "http-backend-async" "cl-stack-http")
          :record-versions (("cl-stack-ssl" . "CL_STACK_SSL_VERSION")
                            ("http-protocol" . "HTTP_PROTOCOL_VERSION")
