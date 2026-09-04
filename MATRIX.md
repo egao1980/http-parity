@@ -14,7 +14,8 @@ Printed at runtime by `(http-parity:print-matrix)`.
 | download | path write | **have** | `download`; dir + CD filename; MIME ext from Content-Type when missing |
 | upload | path read | **have** | `upload` |
 | text / content / ok | `r.text` / `.content` / `.ok` | **have** | response DX |
-| stream | `iter_bytes` / `iter_lines` | **have** | `:want-stream` |
+| stream | `iter_bytes` / `iter_lines` | **have** | `:want-stream` (H1 + **H2** async 0.2.6) |
+| stream-h2 | `http2=True` + `stream=True` | **have** | H2 `:want-stream` + trailers; live `HTTP_PARITY_H2` |
 | elapsed / bytes | `r.elapsed` / `num_bytes_downloaded` | **have** | `response-elapsed` / `response-bytes-downloaded` (0.2.3 / 0.1.6) |
 | hooks | `hooks=` / `event_hooks=` | **have** | CLOS `prepare-request` / `handle-response` |
 | gzip / deflate | Content-Encoding | **have** | chipz; finance demo forces gzip AE |
