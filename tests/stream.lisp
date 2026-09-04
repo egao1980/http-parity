@@ -33,3 +33,14 @@
             (ok (= 200 (response-status res)))
             (ok (streamp (response-body res)))
             (http:close-response res))))))
+
+(deftest parity-want-stream-http2
+  "H2 :want-stream. Fixture is H1 — gate with HTTP_PARITY_H2=1 + HTTPS origin."
+  (if (not (uiop:getenv "HTTP_PARITY_H2"))
+      (skip "HTTP_PARITY_H2 unset (local fixture is HTTP/1.1)")
+      (with-live
+        (let ((res (http:stream :get (live-url "/bytes/32")
+                                :http-version :http/2
+                                :timeout 20.0 :trust-env nil)))
+          (ok (streamp (response-body res)))
+          (http:close-response res)))))
