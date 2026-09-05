@@ -79,29 +79,10 @@
     (funcall bytes->hex digest)))
 
 (defun %b64-decode (s)
-  "RFC 4648 decode → UTF-8 string. Local impl — avoid cl-base64 dual-load
-   decode-table corruption when QL + OCI both ship the system."
-  (let* ((alphabet "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/")
-         (s (remove-if (lambda (c) (member c '(#\Space #\Newline #\Return #\Tab))) s))
-         (out (make-array (* 3 (ceiling (length s) 4))
-                          :element-type '(unsigned-byte 8)
-                          :fill-pointer 0)))
-    (labels ((val (c)
-               (or (position c alphabet :test #'char=)
-                   (when (char= c #\=) 0)
-                   (error "bad base64 char ~S" c))))
-      (loop for i from 0 below (length s) by 4
-            for a = (val (char s i))
-            for b = (val (char s (+ i 1)))
-            for c = (val (char s (+ i 2)))
-            for d = (val (char s (+ i 3)))
-            for n = (logior (ash a 18) (ash b 12) (ash c 6) d)
-            do (vector-push (ldb (byte 8 16) n) out)
-               (unless (char= (char s (+ i 2)) #\=)
-                 (vector-push (ldb (byte 8 8) n) out))
-               (unless (char= (char s (+ i 3)) #\=)
-                 (vector-push (ldb (byte 8 0) n) out)))
-      (babel:octets-to-string out :encoding :utf-8))))
+  "RFC 4648 decode → UTF-8 string."
+  (babel:octets-to-string
+   (encoding-protocol:decode s :encoding :base64)
+   :encoding :utf-8))
 
 (defun %basic-ok-p (headers user pass)
   "Accept Authorization: Basic <b64(user:pass)> (case-insensitive scheme)."
