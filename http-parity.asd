@@ -1,5 +1,5 @@
 (defsystem "http-parity"
-  :version "0.1.0"
+  :version "0.1.1"
   :description "Demo/test: cl-stack-http feature parity vs requests/httpx (async preferred)"
   :author "egao1980"
   :license "MIT"
@@ -7,6 +7,7 @@
                "http-backend-async"
                "event-protocol"
                "http-protocol"
+               "encoding-protocol"
                "alexandria"
                "babel"
                "blackbird"
@@ -18,6 +19,7 @@
   (:cl-repo
    (:ci (:with ("cl-stack-ssl" "http-encoding-chipz" "http-encoding-brotli"
                 "http-encoding-zstd" "cl-stack-brotli" "cl-stack-zstd")
+         :sources (("encoding-protocol" :oci))
          :load-before-test ("cl+ssl" "cl-stack-ssl" "http-backend-async" "cl-stack-http")
          :record-versions (("cl-stack-ssl" . "CL_STACK_SSL_VERSION")
                            ("http-protocol" . "HTTP_PROTOCOL_VERSION")
