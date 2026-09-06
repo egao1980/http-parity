@@ -61,29 +61,41 @@
 
 (defun %socks-copy (from to)
   (let ((buf (make-array 4096 :element-type '(unsigned-byte 8))))
-    (handler-case
-        (loop for n = (read-sequence buf from)
-              until (zerop n)
-              do (write-sequence buf to :end n)
-                 (force-output to))
-      (error ()))))
+    (loop for n = (read-sequence buf from)
+          until (zerop n)
+          do (write-sequence buf to :end n)
+             (force-output to))))
+
+(defun %socks-read-http-head (stream)
+  "Read through the first HTTP header terminator (CRLFCRLF)."
+  (let ((out (make-array 0 :element-type '(unsigned-byte 8)
+                         :adjustable t :fill-pointer 0)))
+    (loop for b = (read-byte stream nil nil)
+          while b
+          do (vector-push-extend b out)
+             (when (and (>= (length out) 4)
+                        (= (aref out (- (length out) 4)) 13)
+                        (= (aref out (- (length out) 3)) 10)
+                        (= (aref out (- (length out) 2)) 13)
+                        (= (aref out (- (length out) 1)) 10))
+               (return)))
+    out))
 
 (defun %socks-relay (client-stream dest-host dest-port)
+  "SOCKS5 CONNECT then one HTTP/1 request/response (GET has no body)."
   (let ((origin nil))
     (unwind-protect
          (progn
            (setf origin (usocket:socket-connect dest-host dest-port
-                                                :element-type '(unsigned-byte 8)
-                                                :timeout 5))
+                                                :element-type '(unsigned-byte 8)))
            (%socks-write client-stream
                          (%ub8 #x05 #x00 #x00 #x01 0 0 0 0 0 0))
-           (let ((origin-stream (usocket:socket-stream origin)))
-             ;; Up-copy in a thread; do not join (client close unblocks it).
-             (bt:make-thread
-              (lambda ()
-                (%socks-copy client-stream origin-stream))
-              :name "http-parity-socks-up")
-             (%socks-copy origin-stream client-stream)))
+           (let* ((origin-stream (usocket:socket-stream origin))
+                  (head (%socks-read-http-head client-stream)))
+             (when (plusp (length head))
+               (write-sequence head origin-stream)
+               (force-output origin-stream)
+               (%socks-copy origin-stream client-stream))))
       (when origin
         (ignore-errors (usocket:socket-close origin))))))
 
