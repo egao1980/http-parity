@@ -91,6 +91,7 @@ Print matrix only:
 | Stream | `:want-stream` sync + async |
 | Files | multipart tuples, download/upload + CD filename + MIME ext |
 | Status | `raise-for-status`, short timeout |
+| SOCKS | local SOCKS5h GET (async); winhttp/dexador missing |
 
 ## Layering
 

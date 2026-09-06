@@ -28,7 +28,7 @@
     ("redirect" "allow_redirects / history" :have "protocol redirects")
     ("timeout" "timeout=" :have "http-timeout")
     ("proxy" "proxies=" :have "http-proxy-config / env")
-    ("socks" "socks5://" :partial "async SOCKS5; not all backends")
+    ("socks" "socks5://" :have "async SOCKS5 including socks5h; winhttp/dexador missing")
     ("http2" "http2=True" :have "http-protocol 0.3.0 preference/ALPN; async/winhttp wire")
     ("oauth2" "auth plugins" :sep "cl-stack-oauth2")
     ("jwt" "JWT helpers" :sep "cl-stack-jwt")
