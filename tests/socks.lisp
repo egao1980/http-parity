@@ -18,6 +18,11 @@
             do (return-from %socks-read-n nil))
     buf))
 
+(defun %ub8 (&rest bytes)
+  (make-array (length bytes)
+              :element-type '(unsigned-byte 8)
+              :initial-contents bytes))
+
 (defun %socks-write (stream octets)
   (write-sequence octets stream)
   (force-output stream))
@@ -71,7 +76,7 @@
                                                 :element-type '(unsigned-byte 8)
                                                 :timeout 5))
            (%socks-write client-stream
-                         #(#x05 #x00 #x00 #x01 0 0 0 0 0 0))
+                         (%ub8 #x05 #x00 #x00 #x01 0 0 0 0 0 0))
            (let ((origin-stream (usocket:socket-stream origin)))
              ;; Up-copy in a thread; do not join (client close unblocks it).
              (bt:make-thread
@@ -90,7 +95,7 @@
         (let ((nmethods (aref greet 1)))
           (when (plusp nmethods)
             (%socks-read-n stream nmethods)))
-        (%socks-write stream #(#x05 #x00))
+        (%socks-write stream (%ub8 #x05 #x00))
         (multiple-value-bind (atyp host port)
             (%socks-parse-connect stream)
           (unless (and atyp host port)
@@ -153,22 +158,23 @@
     ((not (fixture-enabled-p))
      (skip "SOCKS live case needs the local HTTP fixture"))
     (t
-     (handler-case
-         (with-parity
-           (with-socks5-fixture ()
-             (unless *socks-port*
-               (error "SOCKS fixture did not bind a port"))
-             (let* ((proxy (format nil "socks5h://127.0.0.1:~A" *socks-port*))
-                    (cfg (make-http-proxy-config :proxy proxy
-                                                 :no-proxy nil
-                                                 :system nil))
-                    (res (http:get (live-url "/get")
-                                   :proxy cfg
-                                   :timeout 10.0
-                                   :trust-env nil)))
-               (ok (= 200 (response-status res)))
-               (ok (search "url" (http:response-text res) :test #'char-equal))
-               (ok (= #x03 *socks-last-atyp*))
-               (ok (string= "127.0.0.1" *socks-last-host*)))))
-       (error (e)
-         (skip (format nil "SOCKS fixture unavailable: ~A" e)))))))
+     (let ((bound (handler-case (progn (start-socks5-fixture) t)
+                    (error (e)
+                      (skip (format nil "could not bind SOCKS port: ~A" e))
+                      nil))))
+       (when bound
+         (unwind-protect
+              (with-parity
+                (let* ((proxy (format nil "socks5h://127.0.0.1:~A" *socks-port*))
+                       (cfg (make-http-proxy-config :proxy proxy
+                                                    :no-proxy nil
+                                                    :system nil))
+                       (res (http:get (live-url "/get")
+                                      :proxy cfg
+                                      :timeout 10.0
+                                      :trust-env nil)))
+                  (ok (= 200 (response-status res)))
+                  (ok (search "url" (http:response-text res) :test #'char-equal))
+                  (ok (= #x03 *socks-last-atyp*))
+                  (ok (string= "127.0.0.1" *socks-last-host*))))
+           (stop-socks5-fixture)))))))
