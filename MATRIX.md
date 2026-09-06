@@ -26,7 +26,7 @@ Printed at runtime by `(http-parity:print-matrix)`.
 | redirect | `allow_redirects` / history | **have** | protocol |
 | timeout | `timeout=` | **have** | `http-timeout` |
 | proxy | `proxies=` | **have** | `http-proxy-config` |
-| socks | socks5 | **partial** | async SOCKS5 |
+| socks | socks5 | **have** | async SOCKS5 including socks5h; winhttp/dexador missing |
 | http2 | `http2=True` | **have** | http-protocol **0.3.0** preference/ALPN; async/winhttp wire |
 | oauth2 | auth plugins | **sep** | [`cl-stack-oauth2`](https://github.com/egao1980/cl-stack-oauth2) |
 | jwt | JWT helpers | **sep** | [`cl-stack-jwt`](https://github.com/egao1980/cl-stack-jwt) |

@@ -51,6 +51,7 @@
                (:file "stream")
                (:file "files")
                (:file "status")
+               (:file "socks")
                (:file "demo")
                (:file "finance-demo"))
   :perform (test-op (o c)
